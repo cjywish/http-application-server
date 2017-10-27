@@ -4,10 +4,27 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 
+import webserver.RequestHandler;
+
 public class HttpRequestUtils {
+	  private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+	  
+	  public static String getUrl(String firstLine){
+		  String[] splited = firstLine.split(" ");
+      	String path = splited[1];
+      	log.debug("request path : {}", path);
+      	
+      	return path;
+	  }
+	
+	
+	
     /**
      * 
      * 
