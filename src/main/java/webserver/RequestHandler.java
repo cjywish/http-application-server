@@ -29,7 +29,7 @@ public class RequestHandler extends Thread {
                 connection.getPort());
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
-        	BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+        	BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8")); // [home] worked version...
         	
         	String line = br.readLine();
         	if ( line == null){
