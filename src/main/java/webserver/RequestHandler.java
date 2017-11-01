@@ -9,10 +9,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import model.User;
 import util.HttpRequestUtils;
 
 public class RequestHandler extends Thread {
@@ -37,9 +39,20 @@ public class RequestHandler extends Thread {
         	}
         	
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
-
         	String url = HttpRequestUtils.getUrl(line);
-            DataOutputStream dos = new DataOutputStream(out);
+        	if (url.startsWith("/user/create")) {
+        		int index = url.indexOf("?");
+        		String requestPath = url.substring(0,index);
+        		String queryString = url.substring(index+1);
+        		Map<String, String> params =
+        				HttpRequestUtils.parseQeuryString(queryString);
+        		User user = new User(params.get("userId"), params.get("password"), params.get("name"), params.get("email"));
+        		log.debug("User : {}", user);
+        		
+        		url = "/index.html";
+        	} 
+        	
+        	DataOutputStream dos = new DataOutputStream(out);
 
             byte[] body = Files.readAllBytes(new File("./webapp"+ url).toPath());
             response200Header(dos, body.length);
