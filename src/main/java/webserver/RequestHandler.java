@@ -41,7 +41,7 @@ public class RequestHandler extends Thread {
         	}
         	
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
-        	String url = HttpRequestUtils.getUrl(line);
+        	/*String url = HttpRequestUtils.getUrl(line);
         	Map<String, String> headers = new HashMap<String, String>();
         	while(!"".equals(line)){
         		log.debug("header : {}", line);
@@ -63,7 +63,27 @@ public class RequestHandler extends Thread {
         		log.debug("User : {}", user);
         		
         		url = "/index.html";
-        	} 
+        	} */
+        	
+        	String[] tokens = line.split(" ");
+        	int contentLength = 0;
+        	while(!line.equals("")){
+        		log.debug("header : {}", line);
+        		line = br.readLine();
+        		if (line.contains("Content-Length")){
+        			contentLength = getContentLength(line);
+        		}
+        	}
+        	String url = tokens[1];
+        	if (("/user/create".equals(url))){
+        		String body = IOUtils.readData(br, contentLength);
+        		Map<String, String> params =
+        				HttpRequestUtils.parseQeuryString(body);
+        		User user = new User(params.get("userId"), params.get("password"), params.get("name"), params.get("email"));
+        		log.debug("User : {}", user);
+        		DataOutputStream dos = new DataOutputStream(out);
+        		response302Header(dos, "/index.html");
+        	}
         	
         	DataOutputStream dos = new DataOutputStream(out);
 
@@ -75,6 +95,11 @@ public class RequestHandler extends Thread {
         }
     }
 
+    private int getContentLength(String line){
+    	String[] headerTokens = line.split(":");
+    	return Integer.parseInt(headerTokens[1].trim());
+    }
+    
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
         try {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
@@ -86,6 +111,16 @@ public class RequestHandler extends Thread {
         }
     }
 
+   private void response302Header(DataOutputStream dos, String url){
+	   try {
+		   dos.writeBytes("HTTP/1.1 302 Redirect \r\n");
+		   dos.writeBytes("Location: " + url + " \r\n" );
+		   dos.writeBytes("\r\n");
+	   } catch(IOException e){
+		   log.error(e.getMessage());
+	   }
+   }
+    
     private void responseBody(DataOutputStream dos, byte[] body) {
         try {
             dos.write(body, 0, body.length);
